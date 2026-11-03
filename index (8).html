@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Life in 2050</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Anuphan:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: sticky journey bar (four level-colored segments + score) over one activity card at a time. Dark-first starfield; each level owns a color that tags its cards. */
+/* Layout: sticky journey bar (four level-colored segments + score) over one activity card at a time. Neon-city night theme; each level owns a color. */
+:root{
+  --bg:#070b16; --dot:#111d38; --surf:#0f1730; --surf2:#172245; --line:#2a3b66;
+  --ink:#eaf2ff; --soft:#93a6cc;
+  --l1:#35e1ff; --l2:#b6ff3c; --l3:#ff4fd8; --l4:#ffb02e; --l5:#8b7bff;
+  --on:#070b16;
+  --good:#3ee6a0; --bad:#ff6b8a; --goodbg:#0d3a33; --badbg:#44182c;
+  --display:"Unbounded","Anuphan",system-ui,sans-serif;
+  --body:"Anuphan",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#eef3fb; --dot:#dbe4f4; --surf:#ffffff; --surf2:#e6edf9; --line:#c9d5ea;
+    --ink:#0c1430; --soft:#52628a;
+    --l1:#17b9e6; --l2:#8bd31a; --l3:#ff5ccf; --l4:#ffa41a; --l5:#8f80ff;
+    --good:#0b7d58; --bad:#c7303a; --goodbg:#d7f4e8; --badbg:#ffe1e3;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#eef3fb; --dot:#dbe4f4; --surf:#ffffff; --surf2:#e6edf9; --line:#c9d5ea;
+  --ink:#0c1430; --soft:#52628a;
+  --l1:#17b9e6; --l2:#8bd31a; --l3:#ff5ccf; --l4:#ffa41a; --l5:#8f80ff;
+  --good:#0b7d58; --bad:#c7303a; --goodbg:#d7f4e8; --badbg:#ffe1e3;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{min-height:100%}
+body{background:linear-gradient(var(--dot) 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,var(--dot) 1px,transparent 1px) 0 0/34px 34px,var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:45;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--l5);outline-offset:2px}
+p{margin:0}
+h1,h2,h3{font-family:var(--display);margin:0;line-height:1.05;text-wrap:balance}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.soft{color:var(--soft)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .row1{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px}
+.brand{font-family:var(--display);font-weight:800;font-size:1.25rem;text-decoration:none;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+.brand i{width:12px;height:12px;border-radius:50%;background:var(--l3);box-shadow:0 0 0 4px color-mix(in srgb,var(--l3) 25%,transparent)}
+.who{display:inline-flex;align-items:center;gap:8px;max-width:60%;min-height:34px;padding:2px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surf);text-decoration:none;font-weight:600;font-size:.88rem}
+.who span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who b{font-family:var(--mono);font-size:.82rem;background:var(--l4);color:var(--on);border-radius:999px;padding:0 8px;flex:none}
+.journey{display:grid;grid-template-columns:repeat(4,1fr) .8fr;gap:6px;padding:10px 0 10px}
+.seg{display:flex;flex-direction:column;gap:5px;text-decoration:none;min-width:0}
+.seg .track{display:block;height:8px;border-radius:99px;background:var(--surf2);overflow:hidden}
+.seg .track i{display:block;height:100%;background:var(--c);border-radius:99px;transition:width .3s}
+.seg .lbl{display:flex;align-items:baseline;gap:5px;font-size:.74rem;color:var(--soft);font-weight:600;min-width:0}
+.seg .lbl b{font-family:var(--mono);font-size:.78rem;color:var(--ink)}
+.seg .lbl em{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seg.cur .track{height:10px;box-shadow:0 0 0 2px var(--c)}
+.seg.cur .lbl{color:var(--ink)}
+.seg:hover .lbl{color:var(--ink)}
+
+main{padding-block:22px 110px}
+
+/* shared */
+.card{background:var(--surf);border:1px solid var(--line);border-radius:24px;padding:22px}
+.tag{display:inline-flex;align-items:center;font-family:var(--mono);font-weight:700;font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:999px;background:var(--pc,var(--l4));color:var(--on)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:8px 22px;border:0;border-radius:999px;background:var(--pc,var(--l4));color:var(--on);font-weight:700;cursor:pointer;text-decoration:none;transition:transform .1s,filter .1s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{border-color:var(--soft)}
+.btn.sm{min-height:36px;padding:4px 16px;font-size:.9rem}
+.btn:disabled{opacity:.4;pointer-events:none}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:18px}
+.fb{margin-top:14px;font-weight:600;min-height:1.4em}
+.fb.ok{color:var(--good)} .fb.no{color:var(--bad)}
+.opt{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:8px 16px;border:1.5px solid var(--line);border-radius:16px;background:var(--surf2);font-weight:600;cursor:pointer;text-align:left}
+.opt:hover{border-color:var(--soft)}
+.opt.on,.opt[aria-pressed="true"]{background:var(--pc);color:var(--on);border-color:var(--pc)}
+.opt.ok{background:var(--goodbg);border-color:var(--good);color:var(--ink)}
+.opt.no{background:var(--badbg);border-color:var(--bad);color:var(--ink)}
+.opt[disabled]{opacity:.45;cursor:default}
+.opt.ok[disabled],.opt.no[disabled]{opacity:1}
+.opt b{font-family:var(--mono);font-size:.85rem;flex:none}
+input[type=text],input[type=number],select,textarea{width:100%;min-height:46px;padding:8px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--surf2);font-weight:500}
+label.field{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:.92rem;color:var(--soft)}
+@keyframes shake{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes pop{50%{transform:scale(1.05)}}
+.shake{animation:shake .35s}.pop{animation:pop .3s}
+.hint{font-size:.85rem;color:var(--soft)}
+
+/* step page */
+.partline{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.partline .pname{font-weight:700}
+.partline em{font-style:normal;color:var(--soft);font-weight:500}
+.dots{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
+.dots::-webkit-scrollbar{display:none}
+.dot{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:2px 12px;border:1.5px solid var(--line);border-radius:999px;text-decoration:none;font-size:.82rem;font-weight:600;color:var(--soft);background:var(--surf)}
+.dot b{font-family:var(--mono)}
+.dot.done::after{content:"✓";color:var(--good);font-weight:800}
+.dot.cur{background:var(--pc);border-color:var(--pc);color:var(--on)}
+.dot.cur.done::after{color:var(--on)}
+.shead{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.stag{flex:none;min-width:46px;height:46px;padding:0 10px;display:grid;place-items:center;border-radius:14px;background:var(--pc);color:var(--on);font-family:var(--mono);font-weight:700;font-size:1.05rem}
+.shead h2{font-size:clamp(1.6rem,4.5vw,2.2rem);font-weight:800}
+.shead .th{margin-top:6px;color:var(--soft);font-weight:500}
+.scorenote{margin-top:20px;padding-top:14px;border-top:1px dashed var(--line);font-size:.84rem;color:var(--soft)}
+.pager{display:flex;justify-content:space-between;gap:12px;margin-top:22px;flex-wrap:wrap}
+.pager .btn{flex:0 1 auto;max-width:100%}
+
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;align-items:start}
+.hero h1{font-size:clamp(3rem,9vw,5.6rem);font-weight:800;letter-spacing:-.03em;margin-top:14px}
+.hero h1 u{text-decoration:none;background:linear-gradient(transparent 62%,var(--l3) 62%,var(--l3) 90%,transparent 90%);color:var(--ink)}
+.lead{margin-top:16px;font-size:1.08rem;color:var(--soft);max-width:34rem}
+.chat{display:flex;flex-direction:column;gap:8px;margin-top:22px;max-width:25rem}
+.bub{padding:9px 16px;border-radius:20px;font-weight:500;font-size:.95rem;max-width:88%}
+.bub.me{align-self:flex-end;background:var(--l5);color:var(--on);border-bottom-right-radius:6px}
+.bub.ai{align-self:flex-start;background:var(--surf2);border:1px solid var(--line);border-bottom-left-radius:6px}
+.idcard{margin-top:22px;display:flex;flex-direction:column;gap:14px;max-width:31rem}
+.idgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.idgrid .wide{grid-column:1/-1}
+.map{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.map a{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:20px;background:var(--surf);text-decoration:none;transition:transform .12s,border-color .12s}
+.map a:hover{transform:translateX(4px);border-color:var(--c)}
+.map .n{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--c);color:var(--on);font-family:var(--display);font-weight:800;font-size:1.3rem}
+.map b{display:block;font-family:var(--display);font-size:1.15rem;line-height:1.1}
+.map span.t{display:block;color:var(--soft);font-size:.86rem;margin-top:2px}
+.map .meta{margin-left:auto;font-family:var(--mono);font-size:.74rem;color:var(--soft);text-align:right;flex:none}
+.rules{margin-top:36px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.rules .card{padding:16px 18px}
+.rules h3{font-size:1.05rem;margin-bottom:6px}
+.rules p{color:var(--soft);font-size:.9rem}
+
+/* word cards */
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:12px}
+.wcard{padding:14px 16px;border:1px solid var(--line);border-radius:20px;background:var(--surf2);display:flex;flex-direction:column;gap:8px;min-width:0}
+.wcard.heard{border-color:var(--good)}
+.wcard.heard .wn{background:var(--good)}
+.wcard.heard .wn::after{content:"✓";margin-left:3px}
+.vw.got{background:color-mix(in srgb,var(--good) 35%,transparent);border-bottom-color:var(--good)}
+.wcard header{display:flex;align-items:flex-start;gap:12px}
+.wn{flex:none;min-width:30px;height:30px;padding:0 6px;border-radius:10px;display:grid;place-items:center;background:var(--pc);color:var(--on);font-family:var(--mono);font-weight:700;font-size:.8rem}
+.wt{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.wt b{font-family:var(--display);font-size:1.5rem;line-height:1.05;overflow-wrap:anywhere}
+.pos{font-family:var(--mono);font-size:.75rem;color:var(--soft)}
+.ipa{flex-basis:100%;font-family:var(--mono);font-size:.82rem;color:var(--soft)}
+.wsp{display:flex;gap:6px;flex:none}
+.spk{width:38px;height:38px;display:grid;place-items:center;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--surf);cursor:pointer}
+.spk:hover{background:var(--pc);color:var(--on);border-color:var(--pc)}
+.spk svg{width:17px;height:17px;fill:currentColor}
+.spk.slow{width:auto;padding:0 12px;border-radius:999px;font-family:var(--mono);font-size:.72rem;font-weight:700}
+.wth{font-size:1.1rem;font-weight:600}
+.rel{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:2px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surf);font-weight:600;font-size:.9rem}
+.chip i{font-style:normal;font-family:var(--mono);font-weight:800}
+button.chip{cursor:pointer;color:inherit}
+button.chip:hover{background:var(--surf2)}
+.chip svg{width:15px;height:15px;fill:currentColor;opacity:.7;flex:none}
+.chip.syn{border-color:var(--l4)}.chip.syn i{color:var(--good)}
+.chip.ant{border-color:var(--l1)}.chip.ant i{color:var(--bad)}
+.wcard .ex{font-size:.88rem;color:var(--soft);font-style:italic}
+.wcard .ex b{color:var(--ink);font-style:normal}
+.wpanel{position:sticky;top:var(--stk,120px);z-index:30;max-height:42vh;overflow-y:auto;padding:14px;border:1.5px solid var(--pc,var(--l3));border-radius:22px;margin-bottom:18px;background:var(--surf);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.wpanel .wcard{border:0;background:transparent;padding:2px}
+.wpanel .empty{color:var(--soft);font-weight:600;padding:8px 4px}
+
+/* match */
+.prog{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-weight:700;font-size:.85rem;margin-bottom:14px}
+.bar{flex:1;height:10px;border-radius:99px;background:var(--surf2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--pc);width:0;transition:width .25s}
+.mcols{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mb{min-height:52px;padding:6px 12px;border:1.5px solid var(--line);border-radius:14px;background:var(--surf2);font-weight:600;cursor:pointer;overflow-wrap:anywhere;min-width:0}
+.mb.sel{background:var(--pc);color:var(--on);border-color:var(--pc)}
+.mb.done{background:var(--goodbg);border-color:var(--good);pointer-events:none}
+.mb.bad{background:var(--badbg);border-color:var(--bad)}
+
+/* passage */
+.passage .para{margin-top:16px}
+.passage .para:first-of-type{margin-top:0}
+.plabel{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--soft);margin-bottom:4px}
+.lis{min-height:28px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surf2);font-family:var(--mono);font-size:.7rem;font-weight:700;cursor:pointer;text-transform:uppercase}
+.lis:hover{background:var(--pc);color:var(--on);border-color:var(--pc)}
+.passage p{font-size:1.06rem;line-height:1.85}
+.s{border-radius:4px}
+.s.hl{background:color-mix(in srgb,var(--l3) 40%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--l3) 40%,transparent)}
+.vw{padding:0 2px;border:0;border-bottom:2px solid var(--pc);border-radius:4px 4px 0 0;background:color-mix(in srgb,var(--pc) 24%,transparent);font:inherit;color:inherit;cursor:pointer}
+.vw:hover,.vw.on{background:var(--pc);color:var(--on)}
+.dw{padding:0 1px;border:0;border-bottom:2px dotted var(--soft);border-radius:3px;background:transparent;font:inherit;color:inherit;cursor:pointer}
+.dw:hover,.dw.on{background:color-mix(in srgb,var(--soft) 30%,transparent)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:.85rem;color:var(--soft);margin:0 0 10px}
+.legend i{display:inline-block;width:22px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.legend .lg1{background:color-mix(in srgb,var(--pc,var(--l3)) 35%,transparent);border-bottom:2px solid var(--pc,var(--l3))}
+.legend .lg2{border-bottom:2px dotted var(--soft)}
+.legend em{font-style:normal;font-weight:700;color:var(--ink,inherit)}
+.modebar{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 10px}
+.lis[aria-pressed="true"]{background:var(--pc);color:var(--on);border-color:var(--pc)}
+.dinfo{margin:6px 0 4px;padding:10px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surf)}
+.dwen{font-size:1.05rem}.dwth{font-weight:600;margin:0 4px}
+.dtxt{font-size:1.06rem;line-height:2}
+.ptitle{font-size:1.6rem;margin-bottom:14px}
+.slbox{margin-top:20px;padding:16px 18px;border-radius:20px;background:var(--surf2);border:1.5px solid var(--l5)}
+.slbox.hl{box-shadow:0 0 0 4px color-mix(in srgb,var(--l3) 50%,transparent);border-color:var(--l3)}
+.slbox b{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
+.slbox p{margin-top:6px}
+
+/* questions */
+.qcard{padding:16px 18px;border:1px solid var(--line);border-radius:20px;background:var(--surf2);margin-bottom:14px}
+.qcard .qh{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.qcard .num{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--pc);color:var(--on);font-family:var(--mono);font-weight:700;font-size:.85rem;flex:none}
+.qcard .qt{font-family:var(--mono);font-size:.76rem;font-weight:700;color:var(--soft);text-transform:uppercase;letter-spacing:.04em}
+.qcard .qx{font-weight:600;font-size:1.08rem;margin-bottom:10px}
+.qopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:8px}
+.qopts .opt{background:var(--surf);justify-content:center}
+.why{margin-top:10px;font-size:.92rem;padding:10px 12px;border-radius:12px;background:var(--surf)}
+.why .btn{margin-top:8px}
+
+/* score */
+.report{padding:0;overflow:hidden}
+.rtop{display:flex;flex-wrap:wrap;gap:10px 16px;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line);background:var(--surf2)}
+.rtop h2{font-size:1.5rem}
+.stamp{font-family:var(--mono);font-size:.8rem;color:var(--soft)}
+.rwho{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;padding:18px 22px}
+.rbig{display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px;padding:6px 22px 22px}
+.rbig .num{font-family:var(--display);font-weight:800;font-size:clamp(3.6rem,12vw,5.6rem);line-height:.95;letter-spacing:-.03em}
+.rbig .num small{font-size:.38em;color:var(--soft);font-weight:600;letter-spacing:0}
+.rbig .pct{font-family:var(--mono);font-weight:700;font-size:1.4rem}
+.rank{display:inline-block;margin-top:6px;padding:4px 14px;border-radius:999px;background:var(--l3);color:var(--on);font-weight:700}
+.rparts{display:flex;flex-direction:column;gap:12px;padding:0 22px 22px}
+.rp{display:grid;grid-template-columns:minmax(0,12rem) 1fr auto;gap:12px;align-items:center}
+.rp b{font-size:.92rem}
+.rp .bar{height:12px}
+.rp .bar i{background:var(--c)}
+.rp .sc{font-family:var(--mono);font-weight:700;font-size:.9rem;white-space:nowrap}
+.rlist{border-top:1px solid var(--line)}
+.rl{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 22px;border-bottom:1px solid var(--line);font-size:.92rem}
+.rl:last-child{border-bottom:0}
+.rl .tg{width:34px;height:24px;border-radius:8px;display:grid;place-items:center;background:var(--c);color:var(--on);font-family:var(--mono);font-weight:700;font-size:.72rem}
+.rl .pt{font-family:var(--mono);font-weight:700}
+.rl .st{font-size:.76rem;color:var(--soft);min-width:3.4rem;text-align:right}
+.rl.miss .pt{color:var(--soft)}
+.todo{margin:16px 0;padding:14px 18px;border-radius:18px;border:1.5px solid var(--l3);background:color-mix(in srgb,var(--l3) 14%,transparent);font-weight:600}
+.todo a{text-decoration:underline}
+.shot{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px}
+.shot .card{padding:16px 18px}
+.shot h3{font-size:1.05rem;margin-bottom:6px}
+
+/* passage sheet */
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(16px,env(safe-area-inset-bottom,0px));z-index:35;min-height:50px;padding:0 22px;border:0;border-radius:999px;background:var(--l3);color:var(--on);font-weight:800;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.sheet{position:fixed;inset:0;z-index:60;display:flex;justify-content:flex-end;align-items:flex-end}
+.sheet .scrim{position:absolute;inset:0;background:rgba(5,8,14,.6)}
+.sheet .panel{position:relative;width:min(480px,100%);max-height:86%;display:flex;flex-direction:column;background:var(--surf);border:1px solid var(--line);border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet .ph{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.sheet .pb{overflow-y:auto;padding:18px}
+@media (min-width:900px){
+  .sheet{align-items:stretch}
+  .sheet .panel{max-height:none;height:100%;border-radius:24px 0 0 24px}
+}
+
+@media (max-width:760px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .rules{grid-template-columns:minmax(0,1fr)}
+  .seg .lbl em{display:none}
+  .rwho{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .rwho .wide{grid-column:1/-1}
+  .rp{grid-template-columns:minmax(0,1fr) auto}
+  .rp .bar{grid-column:1/-1;order:3}
+  .map .meta{display:none}
+  .who{max-width:55%}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+
+.hero h1{font-size:clamp(2.3rem,8vw,4.4rem);font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.hero h1 u{background:linear-gradient(transparent 62%,var(--l3) 62%,var(--l3) 90%,transparent 90%)}
+.brand,.shead h2,.map b,.rtop h2,.ptitle,.rules h3{font-weight:700}
+.shead h2{font-size:clamp(1.3rem,4vw,1.8rem);line-height:1.15}
+.rbig .num{font-size:clamp(3rem,10vw,4.6rem)}
+.sky{display:block;width:100%;height:auto;margin-top:34px;opacity:.9}
+.sky .bld{fill:var(--surf2);stroke:var(--line);stroke-width:1}
+.ico{width:100%;height:100%;stroke:var(--ink);stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ico .a{fill:var(--ic)}
+.ico .t{fill:var(--ink);stroke:none}
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:12px}
+.vcard{display:flex;gap:12px;padding:12px;border:1.5px solid var(--line);border-radius:20px;background:var(--surf2);min-width:0}
+.vcard.heard{border-color:var(--good)}
+.vcard.heard .wn{background:var(--good)}
+.vcard.heard .wn::after{content:"✓";margin-left:3px}
+.vpic{flex:none;width:84px;height:84px;padding:8px;border-radius:18px;background:var(--surf);border:1px solid var(--line)}
+.vbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.vbody header{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
+.vbody .wt b{font-size:1.1rem;line-height:1.15}
+.vbody .wsp{margin-left:auto}
+.rdth{font-size:.9rem;color:var(--soft);font-weight:600}
+.vcard .wn{background:var(--pc,var(--l1))}
+.vcard.mini{border:0;background:transparent;padding:2px}
+.unlock{margin-top:16px;padding:14px 16px;border-radius:18px;border:1.5px solid var(--good);background:var(--goodbg);font-weight:600;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.lock{padding:22px;border-radius:20px;border:1.5px dashed var(--line);text-align:left}
+.lock h3{font-size:1.2rem;margin-bottom:6px}
+.wbox{display:flex;flex-wrap:wrap;gap:8px;padding:12px;border:1.5px dashed var(--line);border-radius:18px;margin-bottom:16px}
+.wc{min-height:40px;padding:4px 16px;border:1.5px solid var(--pc,var(--l2));border-radius:999px;background:var(--surf2);font-weight:700;cursor:pointer}
+.wc:hover{background:var(--pc,var(--l2));color:var(--on)}
+.wc.used{opacity:.35;pointer-events:none}
+.grow{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line)}
+.grow p{font-size:1.08rem;line-height:2.2}
+.gn{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--pc);color:var(--on);font-family:var(--mono);font-weight:700;font-size:.85rem;margin-top:4px}
+.blank{min-width:7.5rem;min-height:38px;padding:2px 14px;border:0;border-bottom:3px solid var(--soft);border-radius:8px 8px 0 0;background:var(--surf2);font-weight:700;cursor:pointer;color:var(--ink)}
+.blank.sel{border-bottom-color:var(--pc);background:color-mix(in srgb,var(--pc) 22%,transparent)}
+.blank.fill{background:var(--surf2);border-bottom-color:var(--pc)}
+.blank.ok{background:var(--goodbg);border-bottom-color:var(--good)}
+.blank.no{background:var(--badbg);border-bottom-color:var(--bad)}
+.tipbox{margin-bottom:16px;padding:14px 16px;border-radius:18px;border:1.5px solid var(--pc);background:color-mix(in srgb,var(--pc) 10%,transparent)}
+.tips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tips span{display:inline-flex;align-items:center;gap:8px;padding:2px 12px 2px 4px;border-radius:999px;background:var(--surf);border:1px solid var(--line);font-weight:700}
+.tips i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--pc);color:var(--on);font-family:var(--mono);font-size:.8rem}
+.kwt{font-size:1.06rem;line-height:2}
+.kw{padding:0 3px;border:0;border-radius:5px;background:transparent;font:inherit;color:inherit;cursor:pointer}
+.kw:hover{background:var(--surf)}
+.kw.on{background:var(--pc);color:var(--on)}
+.kwf.okt{color:var(--good);font-weight:600}
+.pbox{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0 18px}
+.pbox figure{margin:0;text-align:left}
+.pbox .pi{aspect-ratio:1;padding:14px;border-radius:18px;background:var(--surf2);border:1px solid var(--line)}
+.pbox figcaption{margin-top:6px;font-size:.84rem;font-weight:600;color:var(--soft)}
+.pbox figcaption b{font-family:var(--mono);color:var(--ink)}
+.ex{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.exp{font-weight:700;font-size:1.1rem}
+.ex input{flex:1;min-width:12rem}
+.checks{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.chk{padding:10px 14px;border-radius:14px;font-weight:600}
+.chk.ok{background:var(--goodbg);border:1.5px solid var(--good)}
+.chk.no{background:var(--badbg);border:1.5px solid var(--bad)}
+.chk b{margin-right:6px}
+.pass{margin-top:8px;font-weight:600;color:var(--soft)}
+.pass.yes{color:var(--good)}
+@media (max-width:760px){.pbox{grid-template-columns:repeat(2,minmax(0,1fr))}.vpic{width:68px;height:68px}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="row1">
+      <a class="brand" href="#home"><i></i>Life in 2050</a>
+      <a class="who" id="who" href="#score" hidden></a>
+    </div>
+    <nav class="journey" id="journey" aria-label="Progress"></nav>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<button class="fab" id="fab" type="button" hidden>Open passage</button>
+<div class="sheet" id="sheet" hidden>
+  <div class="scrim" id="scrim"></div>
+  <aside class="panel" role="dialog" aria-modal="true" aria-label="Reading passage">
+    <div class="ph"><b>The reading passage</b><button class="btn ghost sm" id="sx" type="button">Close</button></div>
+    <div class="pb" id="pb"></div>
+  </aside>
+</div>
+
+<script>
+(function(){
+'use strict';
+var KEY='life-2050-v1';
+function $(s,r){return (r||document).querySelector(s);}
+function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+function el(t,c,h){var e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function escRe(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var store={
+  get:function(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+var SPK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg>';
+var HAS_TTS=('speechSynthesis' in window)&&typeof window.SpeechSynthesisUtterance!=='undefined';
+function speak(t,rate){try{var u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=rate||.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(u);}catch(e){}}
+var seqTok=0;
+function speakSeq(list,rate,gap,done){
+  var tok=++seqTok,i=0;
+  try{window.speechSynthesis.cancel();}catch(e){return;}
+  function next(){
+    if(tok!==seqTok)return;
+    if(i>=list.length){if(done)done();return;}
+    try{
+      var u=new SpeechSynthesisUtterance(list[i++]);u.lang='en-US';u.rate=rate;
+      var go=function(){if(tok===seqTok)setTimeout(next,gap);};
+      u.onend=go;u.onerror=go;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  setTimeout(next,80);
+}
+function stopSpeech(){seqTok++;try{window.speechSynthesis.cancel();}catch(e){}}
+
+/* ---------- icons (original line illustrations) ---------- */
+var ICONS={
+ robot:'<line x1="40" y1="11" x2="40" y2="20"/><circle cx="40" cy="8" r="3.5" class="a"/><rect x="22" y="20" width="36" height="26" rx="7" class="a"/><circle cx="32" cy="33" r="3.5" class="t"/><circle cx="48" cy="33" r="3.5" class="t"/><rect x="27" y="50" width="26" height="20" rx="5"/><path d="M27 56l-11 8M53 56l11 8"/>',
+ ai:'<rect x="20" y="20" width="40" height="40" rx="8" class="a"/><path d="M30 12v8M40 12v8M50 12v8M30 60v8M40 60v8M50 60v8M12 30h8M12 40h8M12 50h8M60 30h8M60 40h8M60 50h8"/><text x="40" y="47" text-anchor="middle" font-size="17" font-weight="800" class="t" font-family="monospace">AI</text>',
+ home:'<path class="a" d="M16 36L40 14l24 22v32H16z"/><path d="M8 38L40 10l32 28"/><path d="M30 44a14 14 0 0 1 20 0M34 49a8 8 0 0 1 12 0"/><circle cx="40" cy="54" r="2" class="t"/>',
+ car:'<path class="a" d="M10 52l4-14q2-6 8-6h36q6 0 8 6l4 14v8H10z"/><circle cx="24" cy="60" r="6" style="fill:var(--bg)"/><circle cx="56" cy="60" r="6" style="fill:var(--bg)"/><path d="M28 24a17 17 0 0 1 24 0M33 28a10 10 0 0 1 14 0"/><circle cx="40" cy="31" r="1.8" class="t"/>',
+ fly:'<path class="a" d="M10 56l4-12q2-6 8-6h36q6 0 8 6l4 12v6H10z"/><circle cx="24" cy="62" r="5" style="fill:var(--bg)"/><circle cx="56" cy="62" r="5" style="fill:var(--bg)"/><path d="M16 26h20M44 26h20M26 26v12M54 26v12M24 72v6M40 72v6M56 72v6"/>',
+ vr:'<path class="a" d="M10 28h60q6 0 6 6v18q0 6-6 6H54q-4 0-7-5-3-4-7-4t-7 4q-3 5-7 5H10q-6 0-6-6V34q0-6 6-6z"/><circle cx="23" cy="44" r="8" style="fill:var(--bg)"/><circle cx="57" cy="44" r="8" style="fill:var(--bg)"/><circle cx="23" cy="44" r="2.5" class="t"/><circle cx="57" cy="44" r="2.5" class="t"/>',
+ learn:'<rect x="14" y="14" width="52" height="36" rx="5" class="a"/><path d="M6 58h68l-6 9H12z"/><path class="t" d="M35 23v18l15-9z"/>',
+ energy:'<circle cx="22" cy="22" r="9" class="a"/><path d="M22 6v5M22 33v5M6 22h5M33 22h5M10 10l4 4M34 10l-4 4"/><path d="M56 38v34M44 72h24"/><circle cx="56" cy="38" r="3.5" class="a"/><path d="M56 38V17M56 38l17 10M56 38L39 48"/>',
+ predict:'<circle cx="40" cy="34" r="23" class="a"/><path d="M28 28a14 14 0 0 1 9-9"/><path class="t" d="M40 24l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/><path d="M22 68q18-9 36 0v6H22z"/>',
+ future:'<circle cx="34" cy="42" r="24" class="a"/><path d="M34 26v16l11 7"/><path d="M60 14l11 9-11 9M54 23h17"/>'
+};
+function icon(k,c){return '<svg class="ico" viewBox="0 0 80 80" aria-hidden="true" style="--ic:var('+(c||'--l1')+')">'+ICONS[k]+'</svg>';}
+
+/* ---------- content ---------- */
+var V=[
+ {id:'robot',w:'robot',say:'robot',ipa:'/ˈroʊbɑːt/',rd:'โร-บ็อท',th:'หุ่นยนต์',ic:'robot',f:['robots','robot']},
+ {id:'ai',w:'artificial intelligence (AI)',say:'artificial intelligence',ipa:'/ˌɑːrtɪˈfɪʃl ɪnˈtelɪdʒəns/',rd:'อาร์-ทิ-ฟิ-เชิล อิน-เทล-ลิ-เจินส์',th:'ปัญญาประดิษฐ์',ic:'ai',f:['artificial intelligence']},
+ {id:'home',w:'smart home',say:'smart home',ipa:'/smɑːrt hoʊm/',rd:'สมาร์ท โฮม',th:'บ้านอัจฉริยะ',ic:'home',f:['smart homes','smart home']},
+ {id:'sdc',w:'self-driving car',say:'self driving car',ipa:'/ˌself ˈdraɪvɪŋ kɑːr/',rd:'เซลฟ์-ไดร-วิ่ง คาร์',th:'รถยนต์ขับเคลื่อนอัตโนมัติ',ic:'car',f:['self-driving cars','self-driving car']},
+ {id:'fly',w:'flying car',say:'flying car',ipa:'/ˈflaɪɪŋ kɑːr/',rd:'ฟลาย-อิ้ง คาร์',th:'รถยนต์บินได้',ic:'fly',f:['flying cars','flying car']},
+ {id:'vr',w:'virtual reality',say:'virtual reality',ipa:'/ˌvɜːrtʃuəl riˈæləti/',rd:'เวอร์-ชวล รี-แอล-ลิ-ที',th:'โลกเสมือนจริง',ic:'vr',f:['virtual reality']},
+ {id:'online',w:'online learning',say:'online learning',ipa:'/ˌɑːnlaɪn ˈlɜːrnɪŋ/',rd:'ออน-ไลน์ เลิร์น-นิ่ง',th:'การเรียนออนไลน์',ic:'learn',f:['learn online','online learning']},
+ {id:'energy',w:'renewable energy',say:'renewable energy',ipa:'/rɪˌnuːəbl ˈenərdʒi/',rd:'ริ-นิว-เอ-เบิล เอ็น-เนอร์-จี',th:'พลังงานหมุนเวียน',ic:'energy',f:['renewable energy']},
+ {id:'predict',w:'predict',say:'predict',ipa:'/prɪˈdɪkt/',rd:'พริ-ดิกต์',th:'ทำนาย / คาดการณ์',ic:'predict',f:['predict']},
+ {id:'future',w:'future',say:'future',ipa:'/ˈfjuːtʃər/',rd:'ฟิว-เชอร์',th:'อนาคต',ic:'future',f:['future']}
+];
+var VI={};V.forEach(function(v,i){v.n=i+1;VI[v.id]=v;});
+var FORMMAP={},FORMS=[];
+V.forEach(function(v){v.f.forEach(function(f){FORMMAP[f.toLowerCase()]=v.id;FORMS.push(f);});});
+FORMS.sort(function(a,b){return b.length-a.length;});
+var FORMRE=new RegExp('\\b(?:'+FORMS.map(escRe).join('|')+')\\b','gi');
+var VCOL=['--l1','--l2','--l3','--l4','--l5','--l1','--l2','--l3','--l4','--l5'];
+
+var PASSAGE=[
+ {id:'p1',n:'[1]',t:'What will our homes look like in 2050? Experts predict that most homes will be smart homes. People will control the lights, doors and air conditioners with their voices. Robots will clean the house and cook meals, so people will have more free time.',ic:'home',cap:'Homes'},
+ {id:'p2',n:'[2]',t:'Transport will change, too. Self-driving cars will take us to school and work safely, and we will not need to drive. Some cities will have flying cars, so people will travel above traffic jams.',ic:'fly',cap:'Transport'},
+ {id:'p3',n:'[3]',t:'School and work will also be different. Students will learn online at home or in virtual reality classrooms. Artificial intelligence (AI) will be a personal teacher for everyone, and many people will work from home with the help of AI.',ic:'learn',cap:'School and work'},
+ {id:'p4',n:'[4]',t:'Finally, our planet will be cleaner. People will use renewable energy from the sun and the wind instead of oil and coal, so the air will be fresher. Life in the future will be easier, but we must use technology wisely.',ic:'energy',cap:'Planet'}
+];
+
+var PARTS=[
+  {n:1,en:'Vocabulary',th:'ฟังและจับคู่คำศัพท์ 10 คำ',short:'Vocab',c:'--l1'},
+  {n:2,en:'Fill the Gap',th:'เติมคำในประโยค',short:'Gap',c:'--l2'},
+  {n:3,en:'Topic Detective',th:'หา Topic ของเรื่อง',short:'Topic',c:'--l3'},
+  {n:4,en:'Exit Ticket',th:'แต่งประโยคทำนายอนาคต',short:'Exit',c:'--l4'}
+];
+var STEPS=[
+  {id:'v1',part:1,tag:'A',title:'Listen to the Words',th:'กดลำโพงฟังให้ครบทั้ง 10 คำ เพื่อปลดล็อกด่านจับคู่',max:0,kind:'listen'},
+  {id:'v2',part:1,tag:'B',title:'Match the Meaning',th:'แตะคำภาษาอังกฤษทางซ้าย แล้วแตะความหมายภาษาไทยทางขวา',max:10},
+  {id:'f1',part:2,tag:'A',title:'Complete the Sentences',th:'เลือกคำจาก Word box ไปเติมช่องว่างให้ถูกต้อง',max:5},
+  {id:'t1',part:3,tag:'A',title:'Short Texts',th:'อ่านข้อความสั้น แตะคำสำคัญ 2 คำ แล้วเลือก Topic ที่เหมาะที่สุด',max:3},
+  {id:'rd',part:3,tag:'B',title:'Life in 2050',th:'อ่านผ่านๆ (skim) ดูชื่อเรื่อง ภาพ และคำที่ซ้ำ แตะคำที่ขีดเส้นใต้เพื่อดูความหมาย',max:0},
+  {id:'t2',part:3,tag:'C',title:'Topic of Each Paragraph',th:'เลือก Topic ของแต่ละย่อหน้า และชื่อเรื่องที่ดีที่สุด',max:5},
+  {id:'e1',part:4,tag:'A',title:'My Prediction',th:'แต่ง 1 ประโยค ใช้คำศัพท์ใหม่และ will',max:2}
+];
+var ORDER=['home'].concat(STEPS.map(function(s){return s.id;}),['score']);
+function stepOf(id){return STEPS.filter(function(s){return s.id===id;})[0];}
+function routeTitle(r){return r==='home'?'Home':r==='score'?'Score Report':stepOf(r).title;}
+var PASS=20;
+
+/* ---------- state ---------- */
+var S=store.get(KEY,null);
+if(!S||typeof S!=='object')S={};
+S.name=S.name||'';S.cls=S.cls||'';S.no=S.no||'';S.acts=S.acts||{};S.last=S.last||'';
+function persist(){store.set(KEY,S);}
+function act(id){var a=S.acts[id];if(!a){a=S.acts[id]={data:{},score:null,tries:0,done:false};}if(!a.data)a.data={};return a;}
+function grade(id,score,max){
+  var a=act(id);a.tries=(a.tries||0)+1;a.done=true;
+  if(a.score==null){a.score=score;a.max=max;a.at=Date.now();}
+  a.last=score;persist();chrome();return a;
+}
+function markDone(id){var a=act(id);if(!a.done){a.done=true;persist();chrome();}}
+function totals(){
+  var got=0,max=0,d=0;
+  STEPS.forEach(function(s){
+    var a=S.acts[s.id];
+    if(s.max){max+=s.max;if(a&&a.score!=null)got+=a.score;}
+    if(a&&a.done)d++;
+  });
+  return {got:got,max:max,done:d,count:STEPS.length};
+}
+function heardMap(){var D=act('v1').data;D.heard=D.heard||{};return D.heard;}
+function heardCount(){return Object.keys(heardMap()).length;}
+function stamp(){return new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+function rankOf(p){return p>=90?'Futurist':p>=75?'Pioneer':p>=50?'Explorer':'Beginner';}
+
+/* ---------- shell ---------- */
+var app=$('#app'),journey=$('#journey'),whoEl=$('#who'),fab=$('#fab'),sheet=$('#sheet');
+var curRoute='home',lastRoute=null;
+
+function chrome(){
+  var cur=stepOf(curRoute),h='';
+  PARTS.forEach(function(p){
+    var st=STEPS.filter(function(s){return s.part===p.n;});
+    var d=st.filter(function(s){return S.acts[s.id]&&S.acts[s.id].done;}).length;
+    h+='<a class="seg'+(cur&&cur.part===p.n?' cur':'')+'" href="#'+st[0].id+'" style="--c:var('+p.c+')" aria-label="Level '+p.n+': '+p.en+'"><span class="track"><i style="width:'+Math.round(d/st.length*100)+'%"></i></span><span class="lbl"><b>'+p.n+'</b><em>'+p.short+'</em></span></a>';
+  });
+  var t=totals();
+  h+='<a class="seg'+(curRoute==='score'?' cur':'')+'" href="#score" style="--c:var(--ink)" aria-label="Score report"><span class="track"><i style="width:'+Math.round(t.done/t.count*100)+'%"></i></span><span class="lbl"><b>★</b><em>Score</em></span></a>';
+  journey.innerHTML=h;
+  if(S.name.trim()){whoEl.hidden=false;whoEl.innerHTML='<span>'+esc(S.name.trim())+'</span><b>'+t.got+'/'+t.max+'</b>';}else whoEl.hidden=true;
+  var dots=$('#dots');
+  if(dots&&cur)drawDots(dots,cur);
+}
+function drawDots(dots,cur){
+  dots.innerHTML=STEPS.filter(function(s){return s.part===cur.part;}).map(function(s){
+    var d=S.acts[s.id]&&S.acts[s.id].done;
+    return '<a class="dot'+(s.id===cur.id?' cur':'')+(d?' done':'')+'" href="#'+s.id+'" title="'+esc(s.title)+'"><b>'+s.tag+'</b> '+esc(s.title)+'</a>';
+  }).join('');
+}
+
+/* ---------- passage + sheet ---------- */
+var DICT={
+'a':'หนึ่ง / (คำนำหน้านาม)','above':'เหนือ / ข้างบน','ai':'ปัญญาประดิษฐ์ (AI)','air':'อากาศ','also':'ด้วย / เช่นกัน','and':'และ','artificial':'เทียม / ประดิษฐ์','ask':'ถาม','at':'ที่ / ตอน','be':'เป็น / อยู่ / คือ','but':'แต่','can':'สามารถ','cars':'รถยนต์ (หลายคัน)','change':'เปลี่ยน','cities':'เมือง (หลายเมือง)','classrooms':'ห้องเรียน','clean':'ทำความสะอาด / สะอาด','cleaner':'สะอาดกว่า','coal':'ถ่านหิน','computer':'คอมพิวเตอร์','conditioners':'เครื่องปรับ (air conditioners = เครื่องปรับอากาศ)','control':'ควบคุม','cook':'ทำอาหาร','different':'แตกต่าง','do':'ทำ','doors':'ประตู','drive':'ขับรถ','easier':'ง่ายขึ้น','electricity':'ไฟฟ้า','energy':'พลังงาน','everyone':'ทุกคน','experts':'ผู้เชี่ยวชาญ','finally':'สุดท้ายนี้','floors':'พื้น','flying':'บิน / ที่บินได้','food':'อาหาร','for':'สำหรับ / เพื่อ','free':'ว่าง / ฟรี','fresher':'สดชื่นกว่า / สะอาดกว่า','from':'จาก','future':'อนาคต','have':'มี','help':'ช่วย','home':'บ้าน','homes':'บ้าน (หลายหลัง)','house':'บ้าน','in':'ใน','instead':'แทน','intelligence':'ความฉลาด / ปัญญา','internet':'อินเทอร์เน็ต','jams':'การติดขัด (traffic jams = รถติด)','learn':'เรียนรู้','learning':'การเรียนรู้','lets':'ให้ / อนุญาตให้','life':'ชีวิต','lights':'ไฟ / หลอดไฟ','like':'เหมือน / ชอบ','look':'ดู / ดูเหมือน','make':'ทำ / ทำให้','many':'หลาย / มากมาย','meals':'มื้ออาหาร','more':'มากกว่า / เพิ่มขึ้น','most':'ส่วนใหญ่','must':'ต้อง','need':'ต้องการ / จำเป็นต้อง','never':'ไม่เคย / ไม่มีวัน','not':'ไม่','of':'ของ','oil':'น้ำมัน','old':'แก่ / เก่า','online':'ออนไลน์','or':'หรือ','our':'ของเรา','out':'ออก (run out = หมดไป)','panels':'แผง (solar panels = แผงโซลาร์เซลล์)','people':'ผู้คน','personal':'ส่วนตัว','planet':'ดาวเคราะห์ / โลก','pollution':'มลพิษ','predict':'ทำนาย / คาดการณ์','questions':'คำถาม','quizzes':'แบบทดสอบสั้นๆ','reality':'ความเป็นจริง','renewable':'ที่ใช้แล้วเกิดใหม่ได้','robots':'หุ่นยนต์','run':'วิ่ง / ดำเนินไป','safely':'อย่างปลอดภัย','school':'โรงเรียน','self-driving':'ขับเคลื่อนเองอัตโนมัติ','smart':'ฉลาด / อัจฉริยะ','so':'ดังนั้น / จึง','solar':'เกี่ยวกับดวงอาทิตย์ (พลังงานแสงอาทิตย์)','some':'บาง','sources':'แหล่ง','students':'นักเรียน','study':'เรียน / ศึกษา','sun':'ดวงอาทิตย์','sunlight':'แสงแดด','take':'พาไป / ใช้ (เวลา)','teacher':'ครู','technology':'เทคโนโลยี','that':'ที่ / นั่น','the':'(คำนำหน้านามเฉพาะ)','their':'ของพวกเขา','these':'เหล่านี้','they':'พวกเขา / พวกมัน','time':'เวลา','to':'ไปยัง / เพื่อ (ใช้นำหน้ากริยา)','too':'ด้วย / เช่นกัน','traffic':'การจราจร','transport':'การขนส่ง / การเดินทาง','travel':'เดินทาง','turbines':'กังหัน (wind turbines = กังหันลม)','us':'พวกเรา','use':'ใช้','videos':'วิดีโอ','virtual':'เสมือนจริง','voices':'เสียง','walk':'เดิน','watch':'ดู / รับชม','we':'พวกเรา','what':'อะไร','will':'จะ (บอกอนาคต)','wind':'ลม','wisely':'อย่างฉลาด / อย่างรอบคอบ','with':'ด้วย / กับ','work':'งาน / ทำงาน'
+};
+function tok(seg){return esc(seg).replace(/[A-Za-z][A-Za-z'\-]*/g,function(w){return '<button class="dw" type="button" data-d="'+w.toLowerCase()+'">'+w+'</button>';});}
+function vocabHTML(text){
+  var out='',last=0,m;FORMRE.lastIndex=0;
+  while((m=FORMRE.exec(text))){
+    var id=FORMMAP[m[0].toLowerCase()];
+    out+=tok(text.slice(last,m.index));
+    out+=id?'<button class="vw" type="button" data-w="'+id+'">'+esc(m[0])+'</button>':tok(m[0]);
+    last=m.index+m[0].length;
+  }
+  return out+tok(text.slice(last));
+}
+function dwInfo(word){return '<b class="dwen">'+esc(word)+'</b> <span class="dwth">'+esc(DICT[word.toLowerCase()]||'ยังไม่มีคำแปลคำนี้')+'</span> <button class="lis" type="button" data-say="'+esc(word)+'">🔊 ฟัง</button>';}
+function bindDw(root,show,hide){
+  $$('.dw,.vw',root).forEach(function(bt){bt.addEventListener('click',function(){
+    if(bt.classList.contains('vw')&&show.vw){show.vw(bt);return;}
+    if(bt.classList.contains('on')){hide();return;}
+    $$('.dw.on,.vw.on',root).forEach(function(x){x.classList.remove('on');});bt.classList.add('on');
+    show.dw(bt.dataset.d||bt.dataset.w,bt);speak(bt.textContent,.7);
+  });});
+}
+function passageHTML(o){
+  o=o||{};var hl=o.hl||[],seen={};
+  return '<article class="passage">'+PASSAGE.map(function(p){
+    var t=o.vocab?vocabHTML(p.t,seen):esc(p.t);
+    return '<section class="para"><span class="plabel">Paragraph '+p.n+(o.listen?' <button class="lis" type="button" data-p="'+p.id+'">Listen</button>':'')+'</span><p><span class="s'+(hl.indexOf(p.id)>-1?' hl':'')+'" data-s="'+p.id+'">'+t+'</span></p></section>';
+  }).join('')+'</article>';
+}
+function openSheet(hl){
+  $('#pb').innerHTML='<h3 class="ptitle">Life in 2050</h3>'+passageHTML({hl:hl||[]});
+  sheet.hidden=false;
+  var f=$('#pb .hl');if(f&&f.scrollIntoView)f.scrollIntoView({block:'center'});
+}
+function closeSheet(){sheet.hidden=true;}
+$('#sx').addEventListener('click',closeSheet);
+$('#scrim').addEventListener('click',closeSheet);
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSheet();});
+fab.addEventListener('click',function(){openSheet([]);});
+
+function mcq(root,id,qs,o){
+  o=o||{};
+  var A=act(id),D=A.data;D.ans=D.ans||{};
+  qs.forEach(function(q,i){
+    var card=el('div','qcard');
+    card.innerHTML='<div class="qh"><span class="num">'+(i+1)+'</span>'+(q.tag?'<span class="qt">'+esc(q.tag)+'</span>':'')+'</div><p class="qx">'+esc(q.q)+'</p><div class="qopts"></div><div class="why" hidden></div>';
+    var box=$('.qopts',card),why=$('.why',card);
+    q.o.forEach(function(t,k){
+      var b=el('button','opt',esc(t));b.type='button';
+      b.addEventListener('click',function(){
+        if(D.ans[i]!=null)return;
+        D.ans[i]=k;persist();paint(true);finishCheck();
+      });
+      box.appendChild(b);
+    });
+    function paint(anim){
+      var k=D.ans[i];if(k==null)return;
+      $$('.opt',box).forEach(function(b,j){
+        b.disabled=true;
+        if(j===q.a)b.classList.add('ok');
+        else if(j===k)b.classList.add('no');
+        if(anim&&j===k)b.classList.add(k===q.a?'pop':'shake');
+      });
+      why.hidden=false;
+      why.innerHTML=(k===q.a?'<b>ถูกต้อง</b> ':'<b>ยังไม่ถูก</b> คำตอบคือ '+esc(q.o[q.a])+'. ')+esc(q.why||'');
+      if(q.ev){var bt=el('button','btn ghost sm','ดูหลักฐานในบทอ่าน');bt.type='button';bt.addEventListener('click',function(){openSheet(q.ev);});why.appendChild(document.createElement('br'));why.appendChild(bt);}
+    }
+    paint(false);
+    root.appendChild(card);
+  });
+  var fb=el('p','fb');fb.setAttribute('aria-live','polite');root.appendChild(fb);
+  function summary(){
+    var n=Object.keys(D.ans).length;
+    if(n<qs.length){fb.className='fb';fb.textContent=n?'ตอบแล้ว '+n+' / '+qs.length+' ข้อ':'';return null;}
+    var sc=0;qs.forEach(function(q,i){if(D.ans[i]===q.a)sc++;});
+    fb.className='fb '+(sc>=qs.length*0.75?'ok':'no');
+    fb.textContent='ตอบครบแล้ว ได้ '+sc+' / '+qs.length+' คะแนน (นับจากคำตอบแรก)';
+    return sc;
+  }
+  function finishCheck(){var sc=summary();if(sc!=null)grade(id,sc,qs.length);}
+  summary();
+}
+
+
+var VIEW={};
+
+/* ---------- Level 1: listen ---------- */
+function vcardHTML(v,withMeaning){
+  return '<div class="vpic" style="--c:var('+VCOL[v.n-1]+')">'+icon(v.ic,VCOL[v.n-1])+'</div><div class="vbody"><header><span class="wn">'+v.n+'</span><div class="wt"><b>'+esc(v.w)+'</b><span class="ipa">'+esc(v.ipa)+'</span></div><div class="wsp"><button class="spk" type="button" data-r="0.85" aria-label="Listen to '+esc(v.say)+'">'+SPK+'</button><button class="spk slow" type="button" data-r="0.5" aria-label="Listen slowly">slow</button></div></header><p class="rdth">'+esc(v.rd)+'</p>'+(withMeaning?'<p class="wth">'+esc(v.th)+'</p>':'<button class="btn ghost sm rv" type="button">ดูความหมาย</button><p class="wth" hidden>'+esc(v.th)+'</p>')+'</div>';
+}
+function bindCard(c,v,cb){
+  $$('.spk',c).forEach(function(b){b.addEventListener('click',function(){speak(v.say,parseFloat(b.dataset.r));if(cb)cb();});});
+  var rv=$('.rv',c);
+  if(rv)rv.addEventListener('click',function(){var m=$('.wth',c);m.hidden=false;rv.hidden=true;});
+}
+VIEW.v1=function(b){
+  var list=V;
+  b.innerHTML='<p class="prog"><span id="lc"></span><span class="bar"><i id="lb"></i></span></p><div class="row" style="margin:0 0 14px"><button class="btn sm" id="pa" type="button">Play all 10</button><button class="btn ghost sm" id="ps" type="button">Stop</button></div>'+(HAS_TTS?'':'<p class="hint" style="margin-bottom:12px">เบราว์เซอร์นี้ไม่รองรับเสียงอ่าน ลองเปิดด้วย Chrome หรือ Safari</p>')+'<div class="vgrid" id="wg"></div><div id="unl"></div>';
+  var g=$('#wg',b);
+  function upd(){
+    var n=heardCount();
+    $('#lc',b).textContent='ฟังแล้ว '+n+' / 10 คำ · ต้องกดฟังเองทีละคำ';
+    $('#lb',b).style.width=(n*10)+'%';
+    $('#unl',b).innerHTML=n>=10?'<div class="unlock"><b>ปลดล็อกแล้ว!</b> ไปจับคู่ความหมายต่อได้เลย <a class="btn sm" href="#v2" style="--pc:var(--l2)">Match the Meaning →</a></div>':'';
+  }
+  function mark(v,c){
+    var H=heardMap();
+    if(!H[v.id]){H[v.id]=1;persist();}
+    c.classList.add('heard');
+    if(heardCount()>=10)markDone('v1');
+    upd();
+  }
+  list.forEach(function(v){
+    var c=el('article','vcard'+(heardMap()[v.id]?' heard':''),vcardHTML(v,false));
+    g.appendChild(c);
+    bindCard(c,v,function(){mark(v,c);});
+  });
+  $('#pa',b).addEventListener('click',function(){speakSeq(list.map(function(v){return v.say;}),.8,500);});
+  $('#ps',b).addEventListener('click',stopSpeech);
+  upd();
+};
+
+/* ---------- Level 1: match ---------- */
+VIEW.v2=function(b){
+  if(heardCount()<10){
+    b.innerHTML='<div class="lock"><h3>ด่านนี้ยังล็อกอยู่</h3><p>ต้องกดฟังคำศัพท์ให้ครบทั้ง 10 คำก่อน (ฟังแล้ว '+heardCount()+' / 10)</p><div class="row"><a class="btn" href="#v1" style="--pc:var(--l1)">ไปฟังคำศัพท์ →</a></div></div>';
+    return;
+  }
+  var D=act('v2').data;D.matched=D.matched||[];D.missed=D.missed||{};
+  var Ls=V.map(function(v){return v.id;}),Rs=shuffle(Ls),sl=null,sr=null;
+  b.innerHTML='<div class="prog"><span id="pt"></span><div class="bar"><i id="pf"></i></div></div><div class="mcols"><div class="mcol" id="ml"></div><div class="mcol" id="mr"></div></div><p class="fb" id="fb" aria-live="polite"></p>';
+  var ml=$('#ml',b),mr=$('#mr',b),fb=$('#fb',b);
+  function upd(){var n=D.matched.length;$('#pt',b).textContent=n+' / 10';$('#pf',b).style.width=(n*10)+'%';}
+  function done(){var m=Object.keys(D.missed).length;fb.className='fb ok';fb.textContent='จับคู่ครบแล้ว! ถูกตั้งแต่ครั้งแรก '+(10-m)+' / 10 คำ';}
+  function mk(vid,side){
+    var v=VI[vid];
+    var bt=el('button','mb'+(D.matched.indexOf(vid)>-1?' done':''),esc(side==='L'?v.w:v.th));bt.type='button';
+    bt.addEventListener('click',function(){
+      if(side==='L'){if(sl)sl.b.classList.remove('sel');sl={i:vid,b:bt};speak(v.say);}
+      else{if(sr)sr.b.classList.remove('sel');sr={i:vid,b:bt};}
+      bt.classList.add('sel');
+      if(sl&&sr)pair();
+    });
+    return bt;
+  }
+  function pair(){
+    var a=sl,c=sr;sl=sr=null;
+    if(a.i===c.i){
+      a.b.className='mb done';c.b.className='mb done';D.matched.push(a.i);persist();upd();
+      if(D.matched.length===10){grade('v2',10-Object.keys(D.missed).length,10);done();}
+    }else{
+      D.missed[a.i]=1;persist();
+      a.b.classList.add('bad','shake');c.b.classList.add('bad','shake');
+      setTimeout(function(){a.b.classList.remove('sel','bad','shake');c.b.classList.remove('sel','bad','shake');},450);
+    }
+  }
+  Ls.forEach(function(i){ml.appendChild(mk(i,'L'));});
+  Rs.forEach(function(i){mr.appendChild(mk(i,'R'));});
+  upd();
+  if(D.matched.length===10)done();
+};
+
+/* ---------- Level 2: fill the gap ---------- */
+VIEW.f1=function(b){
+  var Q=[
+    ['Scientists','that people will live on Mars.','predict'],
+    ['In 2050,','will clean our houses and cook our meals.','robots'],
+    ['','will drive us to school safely.','self-driving cars'],
+    ['Students will study at home by','.','online learning'],
+    ['We will use','from the sun and the wind.','renewable energy']
+  ];
+  var D=act('f1').data;
+  if(!D.bank)D.bank=shuffle(Q.map(function(q){return q[2];}));
+  if(!D.put)D.put=[null,null,null,null,null];
+  var selIdx=null,checked=false;
+  b.innerHTML='<p class="hint" style="margin-bottom:12px">แตะช่องว่าง แล้วแตะคำใน Word box (หรือแตะคำก่อน ระบบจะเติมช่องว่างช่องแรกให้) แตะคำที่เติมแล้วเพื่อเอาออก</p><div class="wbox" id="wb" aria-label="Word box"></div><div id="gs"></div><div class="row"><button class="btn" id="ck" type="button" style="--pc:var(--l2)">Check answers</button></div><p class="fb" id="fb" aria-live="polite"></p>';
+  var gs=$('#gs',b),wb=$('#wb',b),fb=$('#fb',b),ck=$('#ck',b);
+  function cap(s,i){return (Q[i][0]===''&&s)?s.charAt(0).toUpperCase()+s.slice(1):s;}
+  function draw(){
+    wb.innerHTML='';
+    D.bank.forEach(function(w){
+      var used=D.put.indexOf(w)>-1;
+      var c=el('button','wc'+(used?' used':''),esc(w));c.type='button';c.disabled=used;
+      c.addEventListener('click',function(){
+        var i=selIdx!=null&&D.put[selIdx]==null?selIdx:D.put.indexOf(null);
+        if(i<0)return;
+        D.put[i]=w;selIdx=null;persist();speak(w,.8);draw();
+      });
+      wb.appendChild(c);
+    });
+    gs.innerHTML='';
+    Q.forEach(function(q,i){
+      var row=el('div','grow');
+      var w=D.put[i];
+      var cls='blank'+(w?' fill':'')+(selIdx===i?' sel':'');
+      if(checked&&w){cls+=(w===q[2]?' ok':' no');}
+      row.innerHTML='<span class="gn">'+(i+1)+'</span><p>'+(q[0]?esc(q[0])+' ':'')+'<button class="'+cls+'" type="button" data-i="'+i+'">'+(w?esc(cap(w,i)):'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')+'</button>'+(q[1]===','||q[1]==='.'?esc(q[1]):' '+esc(q[1]))+'</p>';
+      gs.appendChild(row);
+      $('.blank',row).addEventListener('click',function(){
+        if(D.put[i]){D.put[i]=null;checked=false;fb.textContent='';persist();draw();}
+        else{selIdx=(selIdx===i?null:i);draw();}
+      });
+    });
+    ck.disabled=D.put.indexOf(null)>-1;
+  }
+  ck.addEventListener('click',function(){
+    var ok=0;Q.forEach(function(q,i){if(D.put[i]===q[2])ok++;});
+    checked=true;grade('f1',ok,5);draw();
+    var a=act('f1');
+    fb.className='fb '+(ok>=4?'ok':'no');
+    fb.textContent=ok===5?'ถูกครบทุกข้อ!':'ถูก '+ok+' / 5 ข้อ ข้อที่ผิดเป็นสีแดง แตะแก้แล้วกด Check ใหม่ได้ (คะแนนนับจากครั้งแรก: '+a.score+' / 5)';
+  });
+  draw();
+};
+
+/* ---------- Level 3: short texts ---------- */
+VIEW.t1=function(b){
+  var TXT=[
+    {t:'Robots can clean floors. They can cook food. Some robots can help old people walk. Robots make our work easier.',o:['How robots help people','Famous chefs in Thailand','Floor cleaning products'],a:0,kw:['robots','robot','clean','cook','help','work','easier'],why:'ทั้งข้อความพูดถึง robots และสิ่งที่หุ่นยนต์ช่วยคนทำ'},
+    {t:'Online learning lets students study at home. They need a computer and the internet. They can watch videos, do quizzes and ask the teacher questions online.',o:['Computer games','Online learning','School uniforms'],a:1,kw:['online','learning','study','home','internet','computer','videos','quizzes'],why:'คำที่ซ้ำคือ online / study at home ทั้งข้อความพูดถึงการเรียนออนไลน์'},
+    {t:'Solar panels use sunlight to make electricity. Wind turbines use wind to make electricity. These sources never run out, and they do not make air pollution.',o:['Weather forecast','Air travel','Renewable energy'],a:2,kw:['solar','sunlight','wind','electricity','turbines','panels','never','pollution'],why:'แสงอาทิตย์และลมเป็นพลังงานที่ไม่หมดไป คือ renewable energy'}
+  ];
+  var D=act('t1').data;D.ans=D.ans||{};D.kw=D.kw||{};
+  b.innerHTML='<div class="tipbox"><b>How to find the Topic</b><div class="tips"><span><i>1</i>Title</span><span><i>2</i>Pictures</span><span><i>3</i>Repeated words</span></div><p>Topic = เรื่องทั้งหมดพูดถึงอะไร ตอบได้ด้วยคำหรือวลีสั้นๆ</p></div><div id="qs"></div><p class="fb" id="fb" aria-live="polite"></p>';
+  var qs=$('#qs',b),fb=$('#fb',b);
+  function summary(){
+    var n=Object.keys(D.ans).length;
+    if(n<3){fb.className='fb';fb.textContent=n?'ตอบแล้ว '+n+' / 3 ข้อ':'';return;}
+    var sc=0;TXT.forEach(function(q,i){if(D.ans[i]===q.a)sc++;});
+    fb.className='fb '+(sc>=2?'ok':'no');fb.textContent='ตอบครบแล้ว ได้ '+sc+' / 3 คะแนน (นับจากคำตอบแรก)';
+    grade('t1',sc,3);
+  }
+  TXT.forEach(function(q,i){
+    var card=el('div','qcard');
+    var words=q.t.split(' ').map(function(w,k){return '<button class="kw" type="button" data-k="'+k+'" data-w="'+esc(w.toLowerCase().replace(/[^a-z]/g,''))+'">'+esc(w)+'</button>';}).join(' ');
+    card.innerHTML='<div class="qh"><span class="num">'+(i+1)+'</span><span class="qt">Text '+(i+1)+'</span></div><div class="modebar"><button class="lis" type="button" data-m="kw" aria-pressed="true">🔑 เลือกคำสำคัญ</button><button class="lis" type="button" data-m="dict" aria-pressed="false">📖 ดูคำแปล (ไม่บังคับ)</button></div><p class="kwt">'+words+'</p><p class="kwt dtxt" hidden>'+vocabHTML(q.t)+'</p><p class="dinfo" hidden></p><p class="hint kwf"></p><p class="qx" style="margin-top:12px">What is the topic?</p><div class="qopts"></div><div class="why" hidden></div>';
+    var box=$('.qopts',card),why=$('.why',card),kf=$('.kwf',card);
+    D.kw[i]=D.kw[i]||[];
+    function paintKw(){
+      $$('.kw',card).forEach(function(x){x.classList.toggle('on',D.kw[i].indexOf(+x.dataset.k)>-1);});
+      if(D.kw[i].length<2){kf.textContent='แตะคำสำคัญ 2 คำที่ช่วยตัดสินใจ ('+D.kw[i].length+' / 2)';kf.className='hint kwf';}
+      else{
+        var good=D.kw[i].filter(function(k){return q.kw.indexOf($$('.kw',card)[k].dataset.w)>-1;}).length;
+        kf.className='hint kwf '+(good===2?'okt':'');
+        kf.textContent=good===2?'✓ เลือกคำสำคัญได้ดี':good===1?'ได้ 1 คำที่ดี ลองดูคำที่ซ้ำหรือคำที่บอกหัวข้อเรื่อง':'ลองเลือกคำที่ซ้ำหรือบอกหัวข้อเรื่อง เช่น '+q.kw.slice(0,3).join(', ');
+      }
+    }
+    $$('.kw',card).forEach(function(x){x.addEventListener('click',function(){
+      var k=+x.dataset.k,ix=D.kw[i].indexOf(k);
+      if(ix>-1)D.kw[i].splice(ix,1);else{if(D.kw[i].length>=2)D.kw[i].shift();D.kw[i].push(k);}
+      persist();paintKw();
+    });});
+    q.o.forEach(function(t,k){
+      var bt=el('button','opt',esc(t));bt.type='button';
+      bt.addEventListener('click',function(){if(D.ans[i]!=null)return;D.ans[i]=k;persist();paint(true);summary();});
+      box.appendChild(bt);
+    });
+    function paint(anim){
+      var k=D.ans[i];if(k==null)return;
+      $$('.opt',box).forEach(function(bt,j){bt.disabled=true;if(j===q.a)bt.classList.add('ok');else if(j===k)bt.classList.add('no');if(anim&&j===k)bt.classList.add(k===q.a?'pop':'shake');});
+      why.hidden=false;why.innerHTML=(k===q.a?'<b>ถูกต้อง</b> ':'<b>ยังไม่ถูก</b> คำตอบคือ '+esc(q.o[q.a])+'. ')+esc(q.why);
+    }
+    var kwt=$('.kwt',card),dtxt=$('.dtxt',card),dinfo=$('.dinfo',card);
+    function hideInfo(){dinfo.hidden=true;dinfo.innerHTML='';$$('.dw.on,.vw.on',dtxt).forEach(function(x){x.classList.remove('on');});}
+    $$('.modebar .lis',card).forEach(function(mb){mb.addEventListener('click',function(){
+      var dm=mb.dataset.m==='dict';
+      $$('.modebar .lis',card).forEach(function(x){x.setAttribute('aria-pressed',x===mb?'true':'false');});
+      kwt.hidden=dm;dtxt.hidden=!dm;kf.hidden=dm;hideInfo();
+    });});
+    bindDw(dtxt,{
+      vw:function(bt){var v=VI[bt.dataset.w];
+        if(bt.classList.contains('on')){hideInfo();return;}
+        $$('.dw.on,.vw.on',dtxt).forEach(function(x){x.classList.remove('on');});bt.classList.add('on');
+        dinfo.hidden=false;dinfo.innerHTML='<b class="dwen">'+esc(v.w)+'</b> <span class="dwth">'+esc(v.th)+'</span> <button class="lis" type="button">🔊 ฟัง</button>';
+        $('.lis',dinfo).addEventListener('click',function(){speak(v.say,.7);});speak(v.say,.7);},
+      dw:function(word){dinfo.hidden=false;dinfo.innerHTML=dwInfo(word);$('.lis',dinfo).addEventListener('click',function(){speak(word,.7);});}
+    },hideInfo);
+    paintKw();paint(false);qs.appendChild(card);
+  });
+  summary();
+};
+
+/* ---------- Level 3: reading ---------- */
+VIEW.rd=function(b){
+  var pic='<div class="pbox">'+PASSAGE.map(function(p,i){return '<figure style="--c:var('+PARTS[i%4].c+')"><div class="pi">'+icon(p.ic,PARTS[i%4].c)+'</div><figcaption><b>'+p.n+'</b> '+esc(p.cap)+'</figcaption></figure>';}).join('')+'</div>';
+  b.innerHTML='<p class="hint" style="margin-bottom:10px">ดูชื่อเรื่องและภาพก่อน แล้วอ่านผ่านๆ แตะคำไหนก็ได้เพื่อดูคำแปลและฟังเสียง (ไม่บังคับ) แล้วกด “ปิด” เมื่ออ่านเสร็จ</p><h3 class="ptitle">Life in 2050</h3>'+pic+'<div class="legend"><span><i class="lg1"></i>คำศัพท์ 10 คำที่ฝึกแล้ว</span><span><i class="lg2"></i>คำอื่นๆ ในบทอ่าน</span><em>แตะได้ทุกคำ ไม่บังคับ</em></div><div class="wpanel" id="wp" hidden></div><div id="ps">'+passageHTML({vocab:true,listen:true})+'</div><div class="row"><button class="btn ghost sm" id="stp" type="button">Stop sound</button><button class="btn" id="dn" type="button">I’ve finished skimming</button></div>';
+  var wp=$('#wp',b),ps=$('#ps',b);
+  function closeWp(){wp.hidden=true;wp.innerHTML='';$$('.vw.on',ps).forEach(function(x){x.classList.remove('on');});}
+  var tp=$('.top');if(tp)wp.style.setProperty('--stk',(tp.getBoundingClientRect().bottom+8)+'px');
+  function closeAll(){closeWp();$$('.dw.on',ps).forEach(function(x){x.classList.remove('on');});}
+  bindDw(ps,{
+    vw:function(bt){var v=VI[bt.dataset.w];
+      if(bt.classList.contains('on')&&!wp.hidden){closeAll();return;}
+      $$('.dw.on,.vw.on',ps).forEach(function(x){x.classList.remove('on');});bt.classList.add('on');
+      wp.hidden=false;
+      wp.innerHTML='<div style="display:flex;justify-content:flex-end;margin-bottom:6px"><button class="btn ghost sm" id="wx" type="button">ปิด ✕</button></div><article class="vcard mini">'+vcardHTML(v,true)+'</article>';
+      bindCard($('.vcard',wp),v);
+      $('#wx',wp).addEventListener('click',closeAll);
+      wp.scrollTop=0;speak(v.say,.7);},
+    dw:function(word){wp.hidden=false;
+      wp.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">'+'<div class="dwbox">'+dwInfo(word)+'</div><button class="btn ghost sm" id="wx" type="button">ปิด ✕</button></div>';
+      $('#wx',wp).addEventListener('click',closeAll);
+      $('.lis[data-say]',wp).addEventListener('click',function(){speak(word,.7);});}
+  },closeAll);
+  $$('.lis',ps).forEach(function(bt){
+    bt.addEventListener('click',function(){
+      if(!HAS_TTS)return;
+      var p=PASSAGE.filter(function(x){return x.id===bt.dataset.p;})[0];
+      var sents=p.t.match(/[^.?!]+[.?!]?/g)||[p.t];
+      speakSeq(sents.map(function(s){return s.trim();}),.62,550);
+    });
+  });
+  $('#stp',b).addEventListener('click',stopSpeech);
+  var dn=$('#dn',b);
+  function updDn(){if(act('rd').done){dn.textContent='✓ Finished';dn.className='btn ghost';}}
+  dn.addEventListener('click',function(){markDone('rd');updDn();});
+  updDn();
+};
+
+/* ---------- Level 3: topic of each paragraph ---------- */
+VIEW.t2=function(b){
+  var QS=[
+    {tag:'Paragraph [1]',q:'What is the topic of paragraph [1]?',o:['Famous restaurants','Smart homes and robots','Old buildings'],a:1,why:'ย่อหน้า 1 พูดถึง smart homes และ robots ที่ช่วยงานบ้าน',ev:['p1']},
+    {tag:'Paragraph [2]',q:'What is the topic of paragraph [2]?',o:['Future transport','Traffic rules at school','Buying a new car'],a:0,why:'ย่อหน้า 2 พูดถึง self-driving cars และ flying cars คือการเดินทางในอนาคต',ev:['p2']},
+    {tag:'Paragraph [3]',q:'What is the topic of paragraph [3]?',o:['Sports at school','Cooking at home','School and work in the future'],a:2,why:'ย่อหน้า 3 พูดถึงการเรียนออนไลน์ VR และ AI ในโรงเรียนและที่ทำงาน',ev:['p3']},
+    {tag:'Paragraph [4]',q:'What is the topic of paragraph [4]?',o:['Bad weather','Clean energy and a cleaner planet','Rich cities'],a:1,why:'ย่อหน้า 4 พูดถึง renewable energy และโลกที่สะอาดขึ้น',ev:['p4']},
+    {tag:'Title',q:'Which is the best title for the whole article?',o:['The History of Robots','Why We Should Stop Using Computers','How Technology Will Change Our Lives in 2050'],a:2,why:'ทั้งเรื่องพูดถึงบ้าน การเดินทาง โรงเรียนและงาน และพลังงานในปี 2050',ev:['p1','p2','p3','p4']}
+  ];
+  b.innerHTML='<p class="hint" style="margin-bottom:14px">กดปุ่ม “Open passage” มุมขวาล่างเพื่อเปิดบทอ่านระหว่างตอบ ปุ่มหลังตอบจะไฮไลต์ส่วนที่เป็นเบาะแสให้</p><div id="qs"></div><div id="cl"></div>';
+  mcq($('#qs',b),'t2',QS);
+  var D=act('t2').data;
+  var C=['The title and repeated words (homes, cars, school, energy) are about technology in 2050.','The article has many pictures of food.','The first sentence is about games.'];
+  var card=el('div','qcard','<div class="qh"><span class="num">★</span><span class="qt">My clues · ไม่นับคะแนน</span></div><p class="qx">I chose the title because…</p><div class="qopts" style="grid-template-columns:1fr"></div><div class="why" hidden></div>');
+  var box=$('.qopts',card),why=$('.why',card);
+  C.forEach(function(t,k){
+    var bt=el('button','opt',esc(t));bt.type='button';
+    bt.addEventListener('click',function(){
+      D.clue=k;persist();paint();
+    });
+    box.appendChild(bt);
+  });
+  function paint(){
+    if(D.clue==null)return;
+    $$('.opt',box).forEach(function(bt,j){bt.disabled=true;if(j===0)bt.classList.add('ok');else if(j===D.clue)bt.classList.add('no');});
+    why.hidden=false;why.innerHTML=D.clue===0?'<b>ถูกต้อง</b> ใช้ชื่อเรื่องและคำที่ซ้ำเป็นเบาะแส':'<b>ลองอีกครั้งในใจ</b> เบาะแสที่ดีคือชื่อเรื่องและคำที่ซ้ำ';
+  }
+  paint();$('#cl',b).appendChild(card);
+};
+
+/* ---------- Level 4: exit ticket ---------- */
+var EXFORMS=new RegExp('\\b(?:robots?|artificial intelligence|ai|smart homes?|self-driving cars?|flying cars?|virtual reality|online learning|learn online|renewable energy|predict(?:s|ed)?|future)\\b','i');
+function evalSentence(comp){
+  var t=comp.trim().replace(/[.!?]+$/,'');
+  var words=t.split(/\s+/).filter(Boolean);
+  var vocab=EXFORMS.test(t);
+  var ok=false,reason='';
+  var skip={not:1,also:1,always:1,never:1,probably:1,soon:1,still:1,even:1,all:1,just:1,really:1};
+  var i=0;while(i<words.length&&skip[words[i].toLowerCase()])i++;
+  var w=(words[i]||'').toLowerCase();
+  if(words.length<3){reason='ประโยคสั้นเกินไป เขียนให้ครบอย่างน้อย 3 คำ';}
+  else if(!/^[a-z]+$/.test(w)){reason='หลัง will ควรเป็นคำกริยาภาษาอังกฤษ';}
+  else if(/^(is|are|was|were|am|to|has|have|had|does|do|did)$/.test(w)&&w!=='have'&&w!=='do'){reason='หลัง will ใช้กริยาช่องที่ 1 ไม่ต้องมี is/are/to';}
+  else if(/(ing|ed)$/.test(w)){reason='หลัง will ใช้กริยาช่องที่ 1 ไม่เติม -ing/-ed';}
+  else if(/s$/.test(w)&&!/(ss|us)$/.test(w)){reason='หลัง will ใช้กริยาช่องที่ 1 ไม่เติม -s';}
+  else ok=true;
+  return {vocab:vocab,will:ok,reason:reason};
+}
+VIEW.e1=function(b){
+  var D=act('e1').data;
+  b.innerHTML='<p class="hint" style="margin-bottom:12px">เติมประโยคให้จบ ใช้ <b>คำศัพท์ใหม่</b> อย่างน้อย 1 คำ (แตะจากคลังคำเพื่อเติม หรือพิมพ์เอง) และใช้กริยาช่องที่ 1 หลัง will</p><div class="ex"><span class="exp">In 2050, people will</span><input type="text" id="exi" maxlength="90" autocomplete="off" placeholder="… your idea …" aria-label="Finish the sentence"></div><div class="wbox" id="xb"></div><div class="row"><button class="btn" id="ck" type="button" style="--pc:var(--l4)">Check my sentence</button><button class="btn ghost sm" id="sp" type="button">Listen</button></div><div id="rs" aria-live="polite"></div>';
+  var inp=$('#exi',b),xb=$('#xb',b),rs=$('#rs',b);
+  inp.value=D.text||'';
+  V.forEach(function(v){
+    var c=el('button','wc',esc(v.id==='ai'?'artificial intelligence':v.w));c.type='button';
+    c.addEventListener('click',function(){inp.value=(inp.value.trim()?inp.value.replace(/\s*$/,' '):'')+c.textContent;inp.focus();});
+    xb.appendChild(c);
+  });
+  function show(r,first){
+    var a=act('e1');
+    rs.innerHTML='<div class="checks"><div class="chk '+(r.vocab?'ok':'no')+'"><b>'+(r.vocab?'✓':'✗')+'</b> ใช้คำศัพท์ใหม่จากบทเรียน</div><div class="chk '+(r.will?'ok':'no')+'"><b>'+(r.will?'✓':'✗')+'</b> ใช้ will ถูกต้อง'+(r.will?'':' · '+esc(r.reason||'ตรวจประโยคอีกครั้ง'))+'</div></div><p class="fb '+(a.score===2?'ok':'')+'">'+(first?'คะแนนครั้งแรกถูกบันทึกแล้ว: '+a.score+' / 2':'คะแนนที่บันทึก (ครั้งแรก): '+a.score+' / 2')+'</p>';
+  }
+  $('#ck',b).addEventListener('click',function(){
+    var comp=inp.value;
+    if(comp.trim().length<2){rs.innerHTML='<p class="fb no">เขียนประโยคก่อนนะ</p>';return;}
+    D.text=comp;persist();
+    var r=evalSentence(comp);
+    var first=act('e1').score==null;
+    grade('e1',(r.vocab?1:0)+(r.will?1:0),2);
+    show(r,first);
+  });
+  $('#sp',b).addEventListener('click',function(){speak('In 2050, people will '+inp.value,.8);});
+  if(act('e1').score!=null)show(evalSentence(inp.value),false);
+};
+
+/* ---------- step page ---------- */
+function renderStep(id){
+  var step=stepOf(id),part=PARTS[step.part-1],i=ORDER.indexOf(id);
+  var wrap=el('div','page');wrap.style.setProperty('--pc','var('+part.c+')');
+  wrap.innerHTML='<div class="partline"><span class="tag">Level '+part.n+'</span><span class="pname">'+esc(part.en)+' <em>· '+part.th+'</em></span></div><nav class="dots" id="dots" aria-label="Activities in this level"></nav><section class="card"><header class="shead"><span class="stag">'+step.tag+'</span><div><h2>'+esc(step.title)+'</h2><p class="th">'+esc(step.th)+'</p></div></header><div id="sb"></div>'+(step.max?'<p class="scorenote">คะแนนเต็ม '+step.max+' · นับจากคำตอบแรกเท่านั้น</p>':'')+'</section><div class="pager" id="pg"></div>';
+  app.appendChild(wrap);
+  var prev=ORDER[i-1],next=ORDER[i+1];
+  $('#pg',wrap).innerHTML='<a class="btn ghost" href="#'+prev+'">← '+esc(routeTitle(prev))+'</a><a class="btn" href="#'+next+'">'+(next==='score'?'ดูรายงานคะแนน':esc(routeTitle(next)))+' →</a>';
+  VIEW[id]($('#sb',wrap),step);
+  drawDots($('#dots',wrap),step);
+}
+
+/* ---------- skyline ---------- */
+function skyline(){
+  var x=0,h='',seed=7;
+  function rnd(){seed=(seed*9301+49297)%233280;return seed/233280;}
+  var cols=['var(--l1)','var(--l3)','var(--l5)','var(--l2)'];
+  while(x<600){
+    var w=18+Math.floor(rnd()*26),ht=30+Math.floor(rnd()*70);
+    h+='<rect x="'+x+'" y="'+(120-ht)+'" width="'+w+'" height="'+ht+'" rx="2" class="bld"/>';
+    for(var wy=120-ht+8;wy<112;wy+=11)for(var wx=x+5;wx<x+w-5;wx+=8){if(rnd()>.55)h+='<rect x="'+wx+'" y="'+wy+'" width="3" height="4" rx="1" style="fill:'+cols[Math.floor(rnd()*4)]+'"/>';}
+    x+=w+3;
+  }
+  return '<svg class="sky" viewBox="0 0 600 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">'+h+'</svg>';
+}
+
+/* ---------- home ---------- */
+function renderHome(){
+  var p=el('div'),t=totals();
+  var started=t.done>0&&S.last&&S.last!=='home'&&ORDER.indexOf(S.last)>0;
+  p.innerHTML=
+   '<section class="hero"><div>'+
+   '<span class="tag" style="--pc:var(--l1)">M.3 · Life in the future</span>'+
+   '<h1>Life in <u>2050</u></h1>'+
+   '<p class="lead">ฟังและจับคู่คำศัพท์ 10 คำ เติมประโยค หา Topic ของเรื่อง และแต่งประโยคทำนายอนาคตของคุณเอง</p>'+
+   '<div class="chat" aria-hidden="true"><div class="bub me">Will cars fly in 2050?</div><div class="bub ai">Some cities will have flying cars!</div></div>'+
+   '<form class="card idcard" id="idf" autocomplete="off"><div class="idgrid">'+
+   '<label class="field wide">Name · ชื่อ-นามสกุล<input type="text" id="nm" maxlength="60" placeholder="ใส่ชื่อก่อนเริ่มเล่น"></label>'+
+   '<label class="field">Class · ห้อง<input type="text" id="cl" maxlength="12" placeholder="เช่น ม.3/2"></label>'+
+   '<label class="field">No. · เลขที่<input type="number" id="no" min="1" max="99" inputmode="numeric"></label></div>'+
+   '<div class="row" style="margin-top:0"><button class="btn" id="st" type="submit" style="--pc:var(--l1)">Start Level 1</button></div>'+
+   '<p class="hint" id="hn"></p></form></div>'+
+   '<ol class="map" id="mp"></ol></section>'+skyline()+
+   '<section class="rules"><div class="card"><h3>ต้องฟังก่อน</h3><p>กดฟังคำศัพท์ให้ครบทั้ง 10 คำก่อน จึงจะปลดล็อกด่านจับคู่ความหมาย</p></div>'+
+   '<div class="card"><h3>คะแนนเต็ม 25</h3><p>จับคู่ 10 · เติมคำ 5 · Topic 8 · Exit Ticket 2 นับจากคำตอบแรกเท่านั้น เกณฑ์ผ่าน 20 คะแนน</p></div>'+
+   '<div class="card"><h3>จบแล้วแคปส่งครู</h3><p>ไปที่หน้า Score Report แล้วแคปหน้าจอให้เห็นชื่อ คะแนน และวันเวลา</p></div></section>';
+  app.appendChild(p);
+  var nm=$('#nm',p),cl=$('#cl',p),no=$('#no',p),st=$('#st',p),hn=$('#hn',p);
+  nm.value=S.name;cl.value=S.cls;no.value=S.no;
+  function upd(){
+    var ok=nm.value.trim().length>=2;
+    st.disabled=!ok;st.textContent=started?'Continue':'Start Level 1';
+    hn.textContent=ok?(started?'ทำต่อจากที่ค้างไว้ได้เลย':''):'ต้องใส่ชื่อก่อน คะแนนจึงจะขึ้นในรายงาน';
+  }
+  [nm,cl,no].forEach(function(f){f.addEventListener('input',function(){S.name=nm.value;S.cls=cl.value;S.no=no.value;persist();upd();chrome();});});
+  $('#idf',p).addEventListener('submit',function(e){
+    e.preventDefault();if(nm.value.trim().length<2)return;
+    location.hash='#'+(started?S.last:'v1');
+  });
+  upd();
+  var mp=$('#mp',p);
+  PARTS.forEach(function(pt){
+    var st2=STEPS.filter(function(s){return s.part===pt.n;});
+    var mx=st2.reduce(function(a,s){return a+s.max;},0);
+    var d=st2.filter(function(s){return S.acts[s.id]&&S.acts[s.id].done;}).length;
+    var li=el('li');
+    li.innerHTML='<a href="#'+st2[0].id+'" style="--c:var('+pt.c+')"><span class="n">'+pt.n+'</span><span><b>'+esc(pt.en)+'</b><span class="t">'+esc(pt.th)+'</span></span><span class="meta">'+d+'/'+st2.length+' done<br>'+(mx?mx+' pts':'')+'</span></a>';
+    mp.appendChild(li);
+  });
+}
+
+/* ---------- score ---------- */
+function renderScore(){
+  var t=totals(),pct=t.max?Math.round(t.got/t.max*100):0;
+  var p=el('div');
+  var undone=STEPS.filter(function(s){return !(S.acts[s.id]&&S.acts[s.id].done);});
+  var h='';
+  if(undone.length)h+='<div class="todo">ยังทำไม่ครบ '+undone.length+' กิจกรรม: '+undone.map(function(s){return '<a href="#'+s.id+'">'+esc(s.title)+'</a>';}).join(' · ')+'</div>';
+  h+='<section class="card report" id="report"><div class="rtop"><div><span class="tag" style="--pc:var(--l1)">Life in 2050 · อ23102</span><h2 style="margin-top:8px">Score Report</h2></div><span class="stamp">'+esc(stamp())+'</span></div>'+
+   '<div class="rwho"><label class="field wide">Name<input type="text" id="sn" maxlength="60"></label><label class="field">Class<input type="text" id="sc" maxlength="12"></label><label class="field">No.<input type="number" id="so" min="1" max="99"></label></div>'+
+   '<div class="rbig"><div class="num">'+t.got+'<small>/'+t.max+'</small></div><div><div class="pct">'+pct+'%</div><span class="rank">'+rankOf(pct)+'</span><div class="pass '+(t.got>=PASS?'yes':'')+'">'+(t.got>=PASS?'✓ ผ่านเกณฑ์ ('+PASS+'/'+t.max+')':'เกณฑ์ผ่าน '+PASS+'/'+t.max)+'</div></div></div><div class="rparts">';
+  PARTS.forEach(function(pt){
+    var all=STEPS.filter(function(s){return s.part===pt.n;});
+    var st=all.filter(function(s){return s.max;});
+    var mx=st.reduce(function(a,s){return a+s.max;},0),g=st.reduce(function(a,s){var x=S.acts[s.id];return a+(x&&x.score!=null?x.score:0);},0);
+    h+='<div class="rp" style="--c:var('+pt.c+')"><b>'+pt.n+' · '+esc(pt.en)+'</b><div class="bar"><i style="width:'+Math.round(g/mx*100)+'%"></i></div><span class="sc">'+g+'/'+mx+'</span></div>';
+  });
+  h+='</div><div class="rlist">';
+  STEPS.forEach(function(s){
+    var a=S.acts[s.id],pt=PARTS[s.part-1];
+    var has=a&&a.done,val;
+    if(s.id==='v1')val=heardCount()+'/10 listened';
+    else if(!s.max)val=has?'done':'—';
+    else val=(a&&a.score!=null?a.score:'—')+'/'+s.max;
+    h+='<div class="rl'+(has?'':' miss')+'" style="--c:var('+pt.c+')"><span class="tg">'+s.part+s.tag+'</span><span>'+esc(s.title)+'</span><span class="pt">'+val+'</span><span class="st">'+(a&&a.tries>1?a.tries+' tries':(has?'':'not yet'))+'</span></div>';
+  });
+  h+='</div></section>'+
+   '<div class="shot"><div class="card"><h3>ส่งครูอย่างไร</h3><p class="soft">แคปหน้าจอการ์ด Score Report ให้เห็นชื่อ คะแนนรวม และวันเวลา แล้วส่งตามที่ครูกำหนด</p></div>'+
+   '<div class="card"><h3>คัดลอกสรุปคะแนน</h3><p class="soft" style="margin-bottom:10px">ส่งเป็นข้อความได้ถ้าแคปหน้าจอไม่สะดวก</p><button class="btn sm" id="cp" type="button" style="--pc:var(--l5)">Copy summary</button> <span class="hint" id="cpm"></span></div>'+
+   '<div class="card"><h3>เริ่มใหม่</h3><p class="soft" style="margin-bottom:10px">ลบคำตอบและคะแนนทั้งหมดในเครื่องนี้</p><div id="rs"><button class="btn ghost sm" id="r1" type="button">Reset all</button></div></div></div>';
+  p.innerHTML=h;app.appendChild(p);
+  var sn=$('#sn',p),sc=$('#sc',p),so=$('#so',p);sn.value=S.name;sc.value=S.cls;so.value=S.no;
+  [sn,sc,so].forEach(function(f){f.addEventListener('input',function(){S.name=sn.value;S.cls=sc.value;S.no=so.value;persist();chrome();});});
+  $('#cp',p).addEventListener('click',function(){
+    var txt='Life in 2050 · อ23102\n'+S.name+' · '+S.cls+' · No. '+S.no+'\nScore: '+t.got+'/'+t.max+' ('+pct+'%) · '+rankOf(pct)+'\nDone: '+t.done+'/'+t.count+' activities\n'+stamp();
+    var m=$('#cpm',p);
+    try{navigator.clipboard.writeText(txt).then(function(){m.textContent='คัดลอกแล้ว';},function(){m.textContent='คัดลอกไม่ได้ ให้แคปหน้าจอแทน';});}
+    catch(e){m.textContent='คัดลอกไม่ได้ ให้แคปหน้าจอแทน';}
+  });
+  $('#r1',p).addEventListener('click',function(){
+    var box=$('#rs',p);
+    box.innerHTML='<p class="hint" style="margin-bottom:8px">ลบทุกอย่างและย้อนไปเริ่มใหม่ แน่ใจไหม?</p><button class="btn sm" id="r2" type="button" style="--pc:var(--bad)">Yes, reset</button> <button class="btn ghost sm" id="r3" type="button">Cancel</button>';
+    $('#r3',p).addEventListener('click',function(){render();});
+    $('#r2',p).addEventListener('click',function(){S={name:'',cls:'',no:'',acts:{},last:''};persist();location.hash='#home';render();});
+  });
+}
+
+/* ---------- router ---------- */
+function render(){
+  stopSpeech();closeSheet();
+  var r=(location.hash||'#home').slice(1);
+  if(ORDER.indexOf(r)<0)r='home';
+  if(r!=='home'&&!S.name.trim()){
+    if(location.hash!=='#home'){location.hash='#home';return;}
+    r='home';
+  }
+  curRoute=r;
+  if(r!=='home'){S.last=r;persist();}
+  app.replaceChildren();
+  if(r==='home')renderHome();else if(r==='score')renderScore();else renderStep(r);
+  fab.hidden=['f1','t2','e1'].indexOf(r)<0;
+  chrome();
+  if(lastRoute!==r)window.scrollTo(0,0);
+  lastRoute=r;
+}
+window.addEventListener('hashchange',render);
+render();
+})();
+
+</script>
